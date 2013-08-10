@@ -10,7 +10,7 @@ class ActivityTest extends FunSuite {
 		val startTime = DateTime.now minusMinutes 10
 		val activity = new Activity(startTime)
 		assert(activity.id === startTime)
-		println("Activity created: " + activity)
+		// println("Activity created: " + activity)
 	}
 
 	test("Add duration") {
@@ -31,10 +31,27 @@ class ActivityTest extends FunSuite {
 			addSample(new Sample(2, Dimension.Speed, new Duration(1000))).
 			addSample(new Sample(3, Dimension.Speed, new Duration(2000))).
 			addSample(new Sample(4, Dimension.Speed, new Duration(3000))).
-			addSample(new Sample(5, Dimension.Speed, new Duration(4000)));
+			addSample(new Sample(5, Dimension.Speed, new Duration(4000)))
 		assert(activityWithSamples.figureCount === 0)
 		assert(activityWithSamples.sampleCount === 5)
     assert(activityWithSamples.getSamples(Dimension.Speed).length === 5)
     assert(activityWithSamples.getSamples(Dimension.HeartRate).length === 0)
 	}
+
+  test("Get intervalled samples") {
+    val activity =
+      new Activity(DateTime.now minusDays 10).
+      addSample(new Sample(3, Dimension.Speed, new Duration(2000))).
+      addSample(new Sample(5, Dimension.Speed, new Duration(5000)))
+    assert(activity.sampleCount == 2)
+
+    val intervalledSamples =
+      activity.getIntervalledSamples(Dimension.Speed, new Duration(1000), new Duration(8000))
+    // println("Intervalled speed samples: " + intervalledSamples)
+    assert(intervalledSamples != null)
+    assert(intervalledSamples.length == 9)
+    assert(intervalledSamples(0) == null)
+    assert(intervalledSamples(2) == 3)
+    assert(intervalledSamples(5) == 5)
+  }
 }
