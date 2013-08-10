@@ -5,7 +5,7 @@ import scala.util.parsing.json.JSONObject
 import com.github.nscala_time.time.Imports.DateTime
 import com.github.nscala_time.time.Imports.Duration
 
-// Dimenstion enumeration - values in SI
+// Dimension enumeration - values in SI
 object Dimension extends Enumeration {
    type Dimension = Value
    val Time, Distance, Speed, HeartRate = Value
@@ -20,8 +20,16 @@ object FigureType extends Enumeration {
 import FigureType._
 
 // Figure class
-class Figure[T](value: T, dimension: Dimension, ftype: FigureType) {
-	def this(value: T, dimension: Dimension) = this(value, dimension, Exact)
+class Figure[T](v: T, dimension: Dimension, ftype: FigureType) {
+  require(dimension != null)
+  require(ftype != null)
+
+  val value = v
+
+	def this(v: T, dimension: Dimension) = this(v, dimension, Exact)
+
+  def isDimension(d: Dimension) = (dimension == d)
+  def isFigureType(ft: FigureType) = (ftype == ft)
 }
 
 // Sample class
@@ -47,6 +55,10 @@ class Activity(
 
 	def figureCount() = figures.length
 	def sampleCount() = samples.length
+
+  def getFigure(d: Dimension, ft: FigureType) = figures find((f: Figure[Number]) => (f.isDimension(d) && f.isFigureType(ft)))
+  def getFigure(d: Dimension): Option[Figure[Number]] = getFigure(d, Exact)
+  def getSamples(d: Dimension) = samples filter(_.isDimension(d))
 
 	def toJson() = new JSONObject(Map("startTime" -> startTime))
 	override def toString(): String = toJson.toString 

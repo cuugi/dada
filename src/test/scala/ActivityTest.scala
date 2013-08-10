@@ -19,6 +19,9 @@ class ActivityTest extends FunSuite {
 		assert(activity.figureCount === 0)
 		assert(activityWithDuration.figureCount === 1)
 		assert(activityWithDuration.sampleCount === 0)
+    assert(activity.getFigure(Dimension.Time) isEmpty)
+    assert(!activityWithDuration.getFigure(Dimension.Time).isEmpty)
+    assert(activityWithDuration.getFigure(Dimension.Time).get.value === 360)
 	}
 
 	test("Add speed samples") {
@@ -31,5 +34,7 @@ class ActivityTest extends FunSuite {
 			addSample(new Sample(5, Dimension.Speed, new Duration(4000)));
 		assert(activityWithSamples.figureCount === 0)
 		assert(activityWithSamples.sampleCount === 5)
+    assert(activityWithSamples.getSamples(Dimension.Speed).length === 5)
+    assert(activityWithSamples.getSamples(Dimension.HeartRate).length === 0)
 	}
 }
