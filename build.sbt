@@ -1,6 +1,6 @@
 name := "dada"
 
-scalaVersion := "2.9.3"
+scalaVersion := "2.10.3"
 
 libraryDependencies += "com.github.nscala-time" %% "nscala-time" % "0.4.2"
 

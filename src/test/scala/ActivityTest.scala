@@ -10,7 +10,6 @@ class ActivityTest extends FunSuite {
 		val startTime = DateTime.now minusMinutes 10
 		val activity = new Activity(startTime)
 		assert(activity.id === startTime)
-		// println("Activity created: " + activity)
 	}
 
 	test("Add duration") {
@@ -47,7 +46,6 @@ class ActivityTest extends FunSuite {
 
     val intervalledSamples =
       activity.getIntervalledSamples(Dimension.Speed, new Duration(1000), new Duration(8000))
-    // println("Intervalled speed samples: " + intervalledSamples)
     assert(intervalledSamples != null)
     assert(intervalledSamples.length == 9)
     assert(intervalledSamples(0) == null)
