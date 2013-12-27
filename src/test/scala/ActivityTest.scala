@@ -1,5 +1,7 @@
 import dada._
 
+import scala.language.postfixOps
+
 import com.github.nscala_time.time.Imports.DateTime
 import com.github.nscala_time.time.Imports.Duration
 

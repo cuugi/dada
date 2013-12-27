@@ -16,7 +16,6 @@ class JsonOutputTest extends FunSuite {
       addSample(new Sample[Number](1402.22, Dimension.Altitude, Duration.standardSeconds(1))).
       addSample(new Sample[Number](60.1, Dimension.Latitude, Duration.standardSeconds(1))).
       addSample(new Sample[Number](20.1, Dimension.Longitude, Duration.standardSeconds(1)))
-
   }
 
   test("Initialize") {

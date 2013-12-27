@@ -26,12 +26,13 @@ class TcxInput(filename: String) extends Input {
   }
 
   private def parseSpeedSamples(startTime: DateTime, trackPointNodes: Seq[Node]): Seq[Sample[Number]] = {
+    val msToKmh = 3.6
     trackPointNodes.map(trackPointNode => {
       val value = (trackPointNode \ "Extensions" \ "TPX" \ "Speed").text.trim
       val duration = calculateDuration(startTime, trackPointNode)
       new Sample[Number](value match {
         case "" => null
-        case _ => value.toDouble
+        case _ => value.toDouble * msToKmh
       }, Dimension.Speed, duration)
     }).filter(_.value != null)
   }

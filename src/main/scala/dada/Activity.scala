@@ -1,5 +1,6 @@
 package dada
 
+import scala.language.postfixOps
 import scala.util.parsing.json.JSONObject
 
 import com.github.nscala_time.time.Imports.DateTime
