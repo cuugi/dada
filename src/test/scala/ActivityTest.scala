@@ -1,5 +1,7 @@
 import dada._
 
+import scala.language.postfixOps
+
 import com.github.nscala_time.time.Imports.DateTime
 import com.github.nscala_time.time.Imports.Duration
 
@@ -24,15 +26,17 @@ class ActivityTest extends FunSuite {
   }
 
   test("Add speed samples") {
-    val activity = new Activity(DateTime.now minusDays 10)
+    val startTime = DateTime.now minusDays 10
+    val activity = new Activity(startTime)
     val activityWithSamples = activity.
       addSample(new Sample(1, Dimension.Speed, new Duration(0))).
       addSample(new Sample(2, Dimension.Speed, new Duration(1000))).
       addSample(new Sample(3, Dimension.Speed, new Duration(2000))).
-      addSample(new Sample(4, Dimension.Speed, new Duration(3000))).
-      addSample(new Sample(5, Dimension.Speed, new Duration(4000)))
+      addSample(new Sample(5, Dimension.Speed, new Duration(4000))).
+      addSample(new Sample(4, Dimension.Speed, new Duration(3000))).sorted
     assert(activityWithSamples.figureCount === 0)
     assert(activityWithSamples.sampleCount === 5)
+    assert(activityWithSamples.stopTime === (startTime plus new Duration(4000)))
     assert(activityWithSamples.getSamples(Dimension.Speed).length === 5)
     assert(activityWithSamples.getSamples(Dimension.HeartRate).length === 0)
   }

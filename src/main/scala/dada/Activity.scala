@@ -1,5 +1,6 @@
 package dada
 
+import scala.language.postfixOps
 import scala.util.parsing.json.JSONObject
 
 import com.github.nscala_time.time.Imports.DateTime
@@ -60,6 +61,17 @@ class Activity(startTime: DateTime,
 
   def this(startTime: DateTime) = this(startTime, Nil, Nil)
 
+  private def sampleSort(s1: Sample[Number], s2: Sample[Number]): Boolean = (s1.time isLongerThan s2.time)
+
+  /** Returns an activity with sorted samples. */
+  def sorted = new Activity(startTime, figures, samples sortWith sampleSort reverse)
+
+  /** Activity must be sorted for this to work. */
+  def duration: Duration = samples.last.time
+
+  /** Activity must be sorted for this to work. */
+  def stopTime: DateTime = startTime plus duration
+
   def addFigure(figure: Figure[Number]) = new Activity(startTime, figure :: figures, samples)
 
   def addSample(sample: Sample[Number]) = new Activity(startTime, figures, sample :: samples)
@@ -91,7 +103,7 @@ class Activity(startTime: DateTime,
       null :: nullIntervalledSamples(interval, time minus interval, samples)
 
   def getIntervalledSamples(d: Dimension, interval: Duration, duration: Duration): List[Number] = {
-    val s = getSamples(d).sortWith((s1: Sample[Number], s2: Sample[Number]) => (s1.time isLongerThan s2.time))
+    val s = getSamples(d).sortWith(sampleSort)
     nullIntervalledSamples(interval, duration, s).reverse
   }
 
