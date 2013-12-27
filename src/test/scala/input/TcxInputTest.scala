@@ -19,6 +19,11 @@ class TcxInputTest extends FunSuite {
     activities.foreach(activity => println("Activity: " + activity))
     assert(activities.size === 1)
     assert(activities.head.getSamples(Dimension.HeartRate).size > 0)
+    assert(activities.head.getSamples(Dimension.Speed).size > 0)
+    assert(activities.head.getSamples(Dimension.Distance).size > 0)
+    assert(activities.head.getSamples(Dimension.Altitude).size > 0)
+    assert(activities.head.getSamples(Dimension.Latitude).size > 0)
+    assert(activities.head.getSamples(Dimension.Longitude).size > 0)
   }
 
 }
