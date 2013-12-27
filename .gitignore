@@ -9,7 +9,7 @@ lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
-input/
+/input/
 
 # Scala-IDE specific
 .scala_dependencies
