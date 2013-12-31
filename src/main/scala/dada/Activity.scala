@@ -9,7 +9,7 @@ import com.github.nscala_time.time.Imports.Duration
 // Dimension enumeration - values in SI
 object Dimension extends Enumeration {
   type Dimension = Value
-  val Time, Distance, Speed, HeartRate, Altitude, Latitude, Longitude = Value
+  val Time, Distance, Speed, HeartRate, Altitude, Latitude, Longitude, Energy = Value
 }
 
 import Dimension._

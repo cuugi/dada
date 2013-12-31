@@ -2,7 +2,7 @@ package input
 
 import org.scalatest.FunSuite
 import dada.input.TcxInput
-import dada.{Dimension, Activity}
+import dada.{FigureType, Dimension, Activity}
 
 class TcxInputTest extends FunSuite {
   test("test1.tcx") {
@@ -11,6 +11,7 @@ class TcxInputTest extends FunSuite {
     activities.foreach(activity => println("Activity: " + activity))
     assert(activities.size === 1)
     assert(activities.head.getSamples(Dimension.HeartRate).size === 0)
+    assert(activities.head.getFigure(Dimension.Energy).get.value === 99)
   }
 
   test("test2.tcx") {
@@ -24,6 +25,7 @@ class TcxInputTest extends FunSuite {
     assert(activities.head.getSamples(Dimension.Altitude).size > 0)
     assert(activities.head.getSamples(Dimension.Latitude).size > 0)
     assert(activities.head.getSamples(Dimension.Longitude).size > 0)
+    assert(activities.head.getFigure(Dimension.HeartRate, FigureType.Average).get.value.intValue === 123)
   }
 
 }
