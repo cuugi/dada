@@ -16,6 +16,7 @@ class JsonOutput(activity: Activity) extends Output {
   private def toValue(value: Any): Any =
     value match {
       case null => "null"
+      case None => "null"
       case o: Option[_] => toValue(o.get)
       case f: Figure[_] => toValue(f.value)
       case d: DateTime => d.toDateTime(DateTimeZone.UTC)

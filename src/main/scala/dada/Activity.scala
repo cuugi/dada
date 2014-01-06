@@ -5,6 +5,7 @@ import scala.util.parsing.json.JSONObject
 
 import com.github.nscala_time.time.Imports.DateTime
 import com.github.nscala_time.time.Imports.Duration
+import scala.annotation.tailrec
 
 // Dimension enumeration - values in SI
 object Dimension extends Enumeration {
@@ -88,23 +89,29 @@ class Activity(startTime: DateTime,
 
   def getSamples(d: Dimension) = samples filter (_.isDimension(d))
 
-  private val zeroTime = new Duration(0)
+  private val zeroTime = Duration.standardSeconds(0)
 
-  private def nullIntervalledSamples(interval: Duration, time: Duration, samples: List[Sample[Number]]): List[Number] =
+  // TODO big interval values cause problems
+  @tailrec
+  private def nullIntervalledSamples(acc: List[Number], interval: Duration, time: Duration, samples: List[Sample[Number]]): List[Number] =
     if (time isShorterThan zeroTime)
-      Nil
-    else if (samples isEmpty)
-      null :: nullIntervalledSamples(interval, time minus interval, samples)
-    else if (time isEqual samples.head.time)
-      samples.head.value :: nullIntervalledSamples(interval, time minus interval, samples.tail)
-    else if (time isShorterThan samples.head.time)
-      samples.head.value :: nullIntervalledSamples(interval, time minus interval, samples.tail)
-    else
-      null :: nullIntervalledSamples(interval, time minus interval, samples)
+      acc
+    else {
+      val take = (!samples.isEmpty) && ((time isEqual samples.head.time) || (time isShorterThan samples.head.time))
+      val sample = take match {
+        case true => samples.head.value
+        case _ => null
+      }
+      val tail = take match {
+        case true => samples.tail
+        case _ => samples
+      }
+      nullIntervalledSamples(sample :: acc, interval, time minus interval, tail)
+    }
 
   def getIntervalledSamples(d: Dimension, interval: Duration, duration: Duration): List[Number] = {
     val s = getSamples(d).sortWith(sampleSort)
-    nullIntervalledSamples(interval, duration, s).reverse
+    nullIntervalledSamples(Nil, interval, duration, s)
   }
 
   def toJson() = new JSONObject(Map("startTime" -> startTime))
