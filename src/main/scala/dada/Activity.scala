@@ -50,6 +50,12 @@ class Sample[T](v: T, dimension: Dimension, t: Duration) {
   override def toString(): String = "(" + value + ", " + dimension + ", " + time + ")"
 }
 
+class Reference[T](id: Number) {
+  val storageId = id
+
+  override def toString: String = id.toString
+}
+
 // Activity class
 class Activity(startTime: DateTime,
                figures: List[Figure[Number]],

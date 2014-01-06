@@ -7,27 +7,17 @@ import dada.storage.Connect
 
 object Convert extends App {
   require(args.size == 2)
-  println("Data to data conversion tool v0.1")
+  println("Data to data conversion tool v0.1.2")
 
   val username = args(0)
   val password = args(1)
 
-  val connect = new Connect
-  val activities = connect.authenticate(username, password).get.listActivities(5)
-  activities.foreach(a => println("Id: " + a))
-  connect.client.shutdown
+  val connect = (new Connect).authenticate(username, password).get
+  val activities = connect.list(15)
+  val inputs: List[Input] = activities.map(connect.load(_))
 
-  // input -> output
-  val inputDir = File("input").toDirectory
+  // connect -> output
   val outputDir = File("output").toDirectory
-
-  val TcxPattern = """(.*)\.tcx$""".r
-  val inputs: Iterator[Input] = inputDir.files.map((file) => {
-    file.name match {
-      case TcxPattern(filename) => new TcxInput("input/" + filename + ".tcx")
-      case _ => null
-    }
-  }).filter(_ != null)
 
   outputDir.createDirectory(false, false)
   inputs.foreach((input) => {
@@ -41,4 +31,6 @@ object Convert extends App {
     writer.write(outputStr)
     writer.close
   })
+
+  connect.client.shutdown
 }

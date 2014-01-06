@@ -3,12 +3,14 @@ package dada.storage
 import dispatch._
 import com.ning.http.client.{Cookie, Response}
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.joda.time.DateTime
 import scala.collection.JavaConversions._
 import scala.annotation.tailrec
 import scala.language.postfixOps
 import org.json4s.JsonAST.JValue
 import org.json4s.DefaultFormats
+import dada.Reference
+import dada.input.{Input, TcxInput}
+import scala.xml.Elem
 
 class Session(c: List[Cookie]) {
   val cookies = c
@@ -23,10 +25,6 @@ class Session(c: List[Cookie]) {
   def <<:(req: Req): Req = addCookie(req, cookies)
 }
 
-class Reference[T](id: Number) {
-  override def toString: String = id.toString
-}
-
 class Connect(session: Session) {
 
   def this() = this(null)
@@ -34,9 +32,11 @@ class Connect(session: Session) {
   val client = Http
 
   val urlBase = :/("connect.garmin.com") secure
+  val activityServiceBase = urlBase / "proxy" / "activity-service-1.2"
   val searchServiceBase = urlBase / "proxy" / "activity-search-service-1.2"
   val loginUrl = urlBase / "signin"
   val listUrl = searchServiceBase / "json" / "activities"
+  val tcxUrl = activityServiceBase / "tcx" / "activity"
 
   private def asSession(response: Response): Session =
     new Session(response.getCookies().toList)
@@ -56,15 +56,24 @@ class Connect(session: Session) {
   }
 
   implicit val formats = DefaultFormats
-  case class Activity(activityId: Number)
 
-  private def toList(json: JValue): List[Activity] =
-    (json \ "results" \ "activities" \ "activity").extract[List[Activity]]
+  case class ConnectActivity(activityId: Number, activityName: String, externalId: String)
 
-  def listActivities(limit: Number): List[Reference[dada.Activity]] = {
+  private def toList(json: JValue): List[ConnectActivity] =
+    (json \ "results" \ "activities" \ "activity").extract[List[ConnectActivity]]
+
+  def list(limit: Number): List[Reference[dada.Activity]] = {
     require(session != null)
     val listRequest = (listUrl <<: session) <<? Map("start" -> 0.toString, "limit" -> limit.toString)
     val response = client(listRequest OK as.json4s.Json).apply()
     toList(response).map(a => new Reference[dada.Activity](a.activityId))
   }
+
+  def load(activity: Reference[dada.Activity]): Input = {
+    require(session != null)
+    val loadRequest: Req = (tcxUrl / activity.storageId.toString <<? Map("full" -> "true")) <<: session
+    val response: Elem = client(loadRequest OK as.xml.Elem).apply()
+    new TcxInput(response)
+  }
+
 }
