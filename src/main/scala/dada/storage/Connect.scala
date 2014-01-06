@@ -33,26 +33,27 @@ class Connect(session: Session) {
   val loginUrl = urlBase / "signin"
   val listUrl = searchServiceBase / "json" / "activities"
 
-  def asSession(response: Response): Session =
-    new Session(response.getCookies().toList) // .filter(_.getName() == "JSESSIONID"))
+  private def asSession(response: Response): Session =
+    new Session(response.getCookies().toList)
 
-  // ref http://www.ciscomonkey.net/gc-to-dm-export/
-  def authenticate(username: String, password: String): Connect = {
+  // ref. http://www.ciscomonkey.net/gc-to-dm-export/
+  def authenticate(username: String, password: String): Option[Connect] = {
     val session = Http(loginUrl OK asSession).apply()
-    val loginRequest = (loginUrl <<: session) <<
+    Http((loginUrl <<: session).POST <<
       Map("login:loginUsernameField" -> username,
         "login:password" -> password,
         "login" -> "login",
         "login:signInButton" -> "Sign In",
-        "javax.faces.ViewState" -> "j_id1")
-
-    new Connect(Http(loginRequest OK asSession).apply())
+        "javax.faces.ViewState" -> "j_id1") > (resp => asSession(resp))).either() match {
+      case Right(_) => Option.apply(new Connect(session))
+      case _ => Option.empty
+    }
   }
 
   def listActivities(limit: Number): List[ActivityReference] = {
     require(session != null)
     val listRequest = (listUrl <<: session) <<? Map("start" -> 0.toString, "limit" -> limit.toString)
-    Http(listRequest OK print).apply()
+    val response = Http(listRequest OK as.json4s.Json).apply()
     Nil
   }
 }

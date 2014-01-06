@@ -13,7 +13,7 @@ object Convert extends App {
   val password = args(1)
 
   val connect = new Connect
-  val activities = connect.authenticate(username, password).listActivities(5)
+  val activities = connect.authenticate(username, password).get.listActivities(5)
 
   // input -> output
   val inputDir = File("input").toDirectory
