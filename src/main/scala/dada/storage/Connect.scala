@@ -7,6 +7,8 @@ import org.joda.time.DateTime
 import scala.collection.JavaConversions._
 import scala.annotation.tailrec
 import scala.language.postfixOps
+import org.json4s.JsonAST.JValue
+import org.json4s.DefaultFormats
 
 class Session(c: List[Cookie]) {
   val cookies = c
@@ -21,7 +23,8 @@ class Session(c: List[Cookie]) {
   def <<:(req: Req): Req = addCookie(req, cookies)
 }
 
-class ActivityReference(id: Number, startTime: DateTime) {
+class Reference[T](id: Number) {
+  override def toString: String = id.toString
 }
 
 class Connect(session: Session) {
@@ -50,10 +53,16 @@ class Connect(session: Session) {
     }
   }
 
-  def listActivities(limit: Number): List[ActivityReference] = {
+  implicit val formats = DefaultFormats
+  case class Activity(activityId: Number)
+
+  private def toList(json: JValue): List[Activity] =
+    (json \ "results" \ "activities" \ "activity").extract[List[Activity]]
+
+  def listActivities(limit: Number): List[Reference[dada.Activity]] = {
     require(session != null)
     val listRequest = (listUrl <<: session) <<? Map("start" -> 0.toString, "limit" -> limit.toString)
     val response = Http(listRequest OK as.json4s.Json).apply()
-    Nil
+    toList(response).map(a => new Reference[dada.Activity](a.activityId))
   }
 }
