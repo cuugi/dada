@@ -60,14 +60,14 @@ class ActivityTest extends FunSuite {
       new Activity(DateTime.now minusDays 10).
         addSample(new Sample(3, Dimension.Speed, new Duration(2000))).
         addSample(new Sample(5, Dimension.Speed, new Duration(5000)))
-    assert(activity.sampleCount == 2)
+    assert(activity.sampleCount === 2)
 
     val intervalledSamples =
       activity.getIntervalledSamples(Dimension.Speed, new Duration(1000), new Duration(8000))
     assert(intervalledSamples != null)
-    assert(intervalledSamples.length == 9)
+    assert(intervalledSamples.length === 9)
     assert(intervalledSamples(0) == null)
-    assert(intervalledSamples(2) == 3)
-    assert(intervalledSamples(5) == 5)
+    assert(intervalledSamples(2) === 3)
+    assert(intervalledSamples(5) === 5)
   }
 }

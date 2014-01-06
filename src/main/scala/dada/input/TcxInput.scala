@@ -4,10 +4,10 @@ import dada._
 import scala.xml.{Node, XML}
 import org.joda.time.{Duration, DateTime}
 
-class TcxInput(filename: String) extends Input {
-  require(filename != null)
+class TcxInput(xmldoc: scala.xml.Elem) extends Input {
+  require(xmldoc != null)
 
-  val xmldoc = XML load filename
+  def this(filename: String) = this(XML load filename)
 
   private def calculateDuration(startTime: DateTime, trackPointNode: Node): Duration = {
     val time = new DateTime(trackPointNode.\("Time").head.text)
@@ -110,7 +110,10 @@ class TcxInput(filename: String) extends Input {
     val laps = (activityNode \ "Lap")
     val calories = new Figure[Number](parseCalories(laps), Dimension.Energy, FigureType.Exact)
     val hrAvg = new Figure[Number](parseAverageHeartRate(laps), Dimension.HeartRate, FigureType.Average)
-    val distance = new Figure[Number](distanceSamples.last.value, Dimension.Distance, FigureType.Exact)
+    val distance = distanceSamples.isEmpty match { // TODO use Option
+      case false => new Figure[Number](distanceSamples.last.value, Dimension.Distance, FigureType.Exact)
+      case _ => new Figure[Number](0, Dimension.Distance, FigureType.Exact)
+    }
 
     new Activity(startTime).
       addSamples(heartRateSamples).

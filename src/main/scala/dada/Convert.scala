@@ -1,21 +1,23 @@
 package dada
 
-import scala.reflect.io.{Path, Directory, File}
+import scala.reflect.io.{Path, File}
 import dada.input.{Input, TcxInput}
 import dada.output.JsonOutput
+import dada.storage.Connect
 
 object Convert extends App {
-  println("Data to data conversion tool v0.1")
-  val inputDir = File("input").toDirectory
-  val outputDir = File("output").toDirectory
+  require(args.size == 2)
+  println("Data to data conversion tool v0.1.2")
 
-  val TcxPattern = """(.*)\.tcx$""".r
-  val inputs: Iterator[Input] = inputDir.files.map((file) => {
-    file.name match {
-      case TcxPattern(filename) => new TcxInput("input/" + filename + ".tcx")
-      case _ => null
-    }
-  }).filter(_ != null)
+  val username = args(0)
+  val password = args(1)
+
+  val connect = (new Connect).authenticate(username, password).get
+  val activities = connect.list(15)
+  val inputs: List[Input] = activities.map(connect.load(_))
+
+  // connect -> output
+  val outputDir = File("output").toDirectory
 
   outputDir.createDirectory(false, false)
   inputs.foreach((input) => {
@@ -29,4 +31,6 @@ object Convert extends App {
     writer.write(outputStr)
     writer.close
   })
+
+  connect.client.shutdown
 }
