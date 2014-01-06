@@ -15,6 +15,7 @@ object Convert extends App {
   val connect = new Connect
   val activities = connect.authenticate(username, password).get.listActivities(5)
   activities.foreach(a => println("Id: " + a))
+  connect.client.shutdown
 
   // input -> output
   val inputDir = File("input").toDirectory

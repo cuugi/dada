@@ -31,6 +31,8 @@ class Connect(session: Session) {
 
   def this() = this(null)
 
+  val client = Http
+
   val urlBase = :/("connect.garmin.com") secure
   val searchServiceBase = urlBase / "proxy" / "activity-search-service-1.2"
   val loginUrl = urlBase / "signin"
@@ -41,8 +43,8 @@ class Connect(session: Session) {
 
   // ref. http://www.ciscomonkey.net/gc-to-dm-export/
   def authenticate(username: String, password: String): Option[Connect] = {
-    val session = Http(loginUrl OK asSession).apply()
-    Http((loginUrl <<: session).POST <<
+    val session = client(loginUrl OK asSession).apply()
+    client((loginUrl <<: session).POST <<
       Map("login:loginUsernameField" -> username,
         "login:password" -> password,
         "login" -> "login",
@@ -62,7 +64,7 @@ class Connect(session: Session) {
   def listActivities(limit: Number): List[Reference[dada.Activity]] = {
     require(session != null)
     val listRequest = (listUrl <<: session) <<? Map("start" -> 0.toString, "limit" -> limit.toString)
-    val response = Http(listRequest OK as.json4s.Json).apply()
+    val response = client(listRequest OK as.json4s.Json).apply()
     toList(response).map(a => new Reference[dada.Activity](a.activityId))
   }
 }
