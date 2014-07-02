@@ -16,31 +16,39 @@ class GpxInput(xmldoc: scala.xml.Elem) extends Input {
       case None => Duration.standardSeconds(0)
     }
 
+  private def calculateDuration(startTime: DateTime, i: Int): Duration = Duration.standardSeconds(i)
+
   private def parseAltitudeSamples(startTime: DateTime, trakptNodes: Seq[Node]): Seq[Sample[Number]] =
-    trakptNodes.map(trakptNode => {
-      val value = (trakptNode \ "ele").text.trim
-      new Sample[Number](value match {
-        case "" => null
-        case _ => value.toDouble
-      }, Dimension.Altitude, calculateDuration(startTime, trakptNode))
+    trakptNodes.zipWithIndex.map({
+      case (trakptNode, i) => {
+        val value = (trakptNode \ "ele").text.trim
+        new Sample[Number](value match {
+          case "" => null
+          case _ => value.toDouble
+        }, Dimension.Altitude, calculateDuration(startTime, i))
+      }
     }).filter(_.value != null)
 
   private def parseLatitudeSamples(startTime: DateTime, trakptNodes: Seq[Node]): Seq[Sample[Number]] =
-    trakptNodes.map(trakptNode => {
-      val value = (trakptNode \ "@lat").text.trim
-      new Sample[Number](value match {
-        case "" => null
-        case _ => value.toDouble
-      }, Dimension.Latitude, calculateDuration(startTime, trakptNode))
+    trakptNodes.zipWithIndex.map({
+      case (trakptNode, i) => {
+        val value = (trakptNode \ "@lat").text.trim
+        new Sample[Number](value match {
+          case "" => null
+          case _ => value.toDouble
+        }, Dimension.Latitude, calculateDuration(startTime, i))
+      }
     }).filter(_.value != null)
 
   private def parseLongitudeSamples(startTime: DateTime, trakptNodes: Seq[Node]): Seq[Sample[Number]] =
-    trakptNodes.map(trakptNode => {
-      val value = (trakptNode \ "@lon").text.trim
-      new Sample[Number](value match {
-        case "" => null
-        case _ => value.toDouble
-      }, Dimension.Longitude, calculateDuration(startTime, trakptNode))
+    trakptNodes.zipWithIndex.map({
+      case (trakptNode, i) => {
+        val value = (trakptNode \ "@lon").text.trim
+        new Sample[Number](value match {
+          case "" => null
+          case _ => value.toDouble
+        }, Dimension.Longitude, calculateDuration(startTime, i))
+      }
     }).filter(_.value != null)
 
   private def parseRoute(trkNode: Node): Activity = {
